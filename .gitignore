@@ -1,0 +1,32 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environment
+venv/
+myenv/
+
+# Environment variables and secrets
+*.env
+config.py
+
+# Flask specific
+instance/
+*.sqlite3
+*.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# OS-specific files.DS_Store
+Thumbs.db
