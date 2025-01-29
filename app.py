@@ -160,9 +160,6 @@ def create_tables():
         db.session.commit()
 
 if __name__ == '__main__':
-<<<<<<< HEAD
     # Get the PORT from the environment variable or default to 5000
-=======
->>>>>>> 7d9fccd (updated the code with logout, download, pagination features)
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
