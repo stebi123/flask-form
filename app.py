@@ -57,12 +57,11 @@ def logout():
 # Route for the password input form
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    save_flag = False
     error_message = ''
 
     control = InputControl.query.first()
     if control and not control.accepting_inputs:
-        raise Forbidden("Form is currently disabled.")
+        raise Forbidden("Sorry!! The form is no longer taking entries..")
 
     if request.method == "POST":
         password_input = request.form.get('password', '')
@@ -72,12 +71,20 @@ def index():
             new_password = Password(password=password_input)
             db.session.add(new_password)
             db.session.commit()
-            save_flag = True
+            
+            # Redirect to the success page
+            return redirect(url_for('success'))
 
         except ValueError as e:
             error_message = str(e)
 
-    return render_template('index.html', save_flag=save_flag, error_message=error_message)
+    return render_template('index.html', error_message=error_message)
+
+# New success route
+@app.route('/success')
+def success():
+    return render_template('success.html')
+
 
 # Route to toggle form inputs
 @app.route('/toggle_form', methods=['POST'])
@@ -92,14 +99,29 @@ def toggle_form():
     db.session.commit()
     return redirect(url_for('view_passwords'))
 
-# Route to display stored passwords
+# Route to display stored passwords with pagination
 @app.route('/view')
 @login_required
 def view_passwords():
-    passwords = Password.query.all()
+    per_page = 10  # Number of passwords per page
+    page = request.args.get('page', 1, type=int)  # Get current page, default to 1
+
+    pagination = Password.query.paginate(page=page, per_page=per_page, error_out=False)
+
+    total_pages = pagination.pages  # Get total number of pages
+
     control = InputControl.query.first()
     accepting_inputs = control.accepting_inputs if control else True
-    return render_template('view_passwords.html', passwords=passwords, accepting_inputs=accepting_inputs)
+
+    return render_template(
+        'view_passwords.html',
+        passwords=pagination.items,  # List of passwords for current page
+        page=page,  # Current page number
+        total_pages=total_pages,  # Total pages
+        per_page=per_page,  # Entries per page
+        accepting_inputs=accepting_inputs  # Control input activation
+    )
+
 
 # Route to delete a password
 @app.route('/delete/<int:id>', methods=['POST'])
@@ -108,7 +130,7 @@ def delete_password(id):
     password = Password.query.get_or_404(id)
     db.session.delete(password)
     db.session.commit()
-    return redirect(url_for('view_passwords'))
+    return redirect(url_for('view_passwords', page=request.args.get('page', 1, type=int)))
 
 # Route to download passwords as CSV
 @app.route('/download')
@@ -138,6 +160,9 @@ def create_tables():
         db.session.commit()
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     # Get the PORT from the environment variable or default to 5000
+=======
+>>>>>>> 7d9fccd (updated the code with logout, download, pagination features)
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
